@@ -1,6 +1,7 @@
 #pragma once
 #include "Arduino.h"
 #include <mrm-board.h>
+#include <map>
 
 /**
 Purpose: mrm-col-b interface to CANBus.
@@ -70,12 +71,13 @@ class Mrm_col_b : public SensorBoard
 	bool hsvStarted(uint8_t deviceNumber);
 	
 public:
+	static std::map<int, std::string>* commandNamesSpecific;
 
 	/** Constructor
 	@param robot - robot containing this board
 	@param maxNumberOfBoards - maximum number of boards
 	*/
-	Mrm_col_b(Robot* robot = NULL, uint8_t maxNumberOfBoards = 4);
+	Mrm_col_b(uint8_t maxNumberOfBoards = 4);
 
 	~Mrm_col_b();
 
@@ -94,7 +96,7 @@ public:
 	@param deviceNumber - Device's ordinal number. Each call of function add() assigns a increasing number to the device, starting with 0.
 	@return - color intensity
 	*/
-	uint16_t colorBlueGeenish(uint8_t deviceNumber);
+	uint16_t colorBlueGreenish(uint8_t deviceNumber);
 
 	/** Blue violetish
 	@param deviceNumber - Device's ordinal number. Each call of function add() assigns a increasing number to the device, starting with 0.
@@ -144,6 +146,8 @@ public:
 	*/
 	uint16_t colorYellow(uint8_t deviceNumber);
 
+	std::string commandName(uint8_t byte);
+
 	/** Set gain
 	@param deviceNumber - Device's ordinal number. Each call of function add() assigns a increasing number to the device, starting with 0. 0xFF - all sensors.
 	@param gainValue:
@@ -159,7 +163,7 @@ public:
 		9	256x (default)
 		10	512x
 	*/
-	void gain(uint8_t deviceNumber = 0, uint8_t gainValue = 0);
+	void gain(Device* device = nullptr, uint8_t gainValue = 0);
 
 	/** Hue
 	@param deviceNumber - Device's ordinal number. Each call of function add() assigns a increasing number to the device, starting with 0.
@@ -171,26 +175,26 @@ public:
 	@param deviceNumber - Device's ordinal number. Each call of function add() assigns a increasing number to the device, starting with 0. 0xFF - all sensors.
 	@param current - 0 - 3
 	*/
-	void illumination(uint8_t deviceNumber = 0, uint8_t current = 0);
+	void illumination(Device* device = nullptr, uint8_t current = 0);
 
 	/** Set integration time
 	@param deviceNumber - Device's ordinal number. Each call of function add() assigns a increasing number to the device, starting with 0. 0xFF - all sensors.
 	@param time - sets the ATIME parameter for integration time from 0 to 255, integration time = (ATIME + 1) * (ASTEP + 1) * 2.78µS.
 	@param step - sets STEP.
 	*/
-	void integrationTime(uint8_t deviceNumber, uint8_t time, uint16_t step);
+	void integrationTime(Device* device = nullptr, uint8_t time = 0, uint16_t step = 0);
 
 	/** Read CAN Bus message into local variables
 	@param canId - CAN Bus id
 	@param data - 8 bytes from CAN Bus message.
 	@param length - number of data bytes
 	*/
-	bool messageDecode(uint32_t canId, uint8_t data[8], uint8_t dlc = 8);
+	bool messageDecode(CANMessage& message);
 
 	/** Erase all patterns
 	@param deviceNumber - Device's ordinal number. Each call of function add() assigns a increasing number to the device, starting with 0. 0xFF - in all sensors
 	*/
-	void patternErase(uint8_t deviceNumber = 0xFF);
+	void patternErase(Device * device = nullptr);
 
 	/** Print HSV patterns
 	*/
@@ -239,12 +243,12 @@ public:
 	/** Instruction to sensor to switch to converting R, G, and B on board and return hue, saturation and value
 	@param sensorNumber - Sensor's ordinal number. Each call of function add() assigns a increasing number to the sensor, starting with 0. 0xFF - all sensors.
 	*/
-	void switchToHSV(uint8_t deviceNumber = 0xFF);
+	void switchToHSV(Device* device = nullptr);
 
 	/** Instruction to sensor to start returning 10 raw colors
 	@param sensorNumber - Sensor's ordinal number. Each call of function add() assigns a increasing number to the sensor, starting with 0. 0xFF - all sensors.
 	*/
-	void switchTo8Colors(uint8_t deviceNumber = 0xFF);
+	void switchTo8Colors(Device* device = nullptr);
 
 	/**Test
 	@param hsv - if not, then 10 colors
